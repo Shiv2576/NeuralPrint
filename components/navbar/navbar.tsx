@@ -8,6 +8,7 @@ import ThemeToggle from "../theme-toggle";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -52,11 +53,12 @@ const Navbar = () => {
           <ThemeToggle />
 
           {/* Auth Buttons */}
-          <Button variant="outline" className="hidden sm:inline-flex">
-            Sign In
-          </Button>
+          <Link href="/login">
+            <Button variant="outline" className="hidden sm:inline-flex">
+              Sign In
+            </Button>
+          </Link>
           <Button className="hidden xs:inline-flex">Job Board</Button>
-
           {/* Mobile Menu */}
           <div className="md:hidden">
             <NavigationSheet />
