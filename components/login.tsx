@@ -15,6 +15,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { signUp, signIn } from "../lib/supabase/supabaselogin";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -22,6 +26,11 @@ const formSchema = z.object({
 });
 
 const Login = () => {
+  const router = useRouter();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       email: "",
@@ -30,8 +39,60 @@ const Login = () => {
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      let result: AuthResult;
+
+      if (isSignUp) {
+        result = await signUp(data.email, data.password);
+      } else {
+        result = await signIn(data.email, data.password);
+      }
+
+      console.log("Auth result:", result); // Debug log
+
+      if (result.error) {
+        console.error("Auth error:", result.error); // Debug log
+        setError(result.error.message);
+        return;
+      }
+
+      console.log("Redirecting to /dashboard..."); // Debug log
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      console.error("Catch error:", err); // Debug log
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    // Simple Google OAuth - you'll need to add this to supabaselogin.ts
+    setLoading(true);
+    setError("");
+
+    // Import supabase client directly for now
+    const { supabase } = await import("../lib/supabase/supabaselogin");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+    // If no error, OAuth will redirect automatically
   };
 
   return (
@@ -86,9 +147,23 @@ const Login = () => {
         />
 
         <div className="relative isolate flex flex-col items-center">
-          <p className="mt-4 text-xl font-semibold tracking-tight">Log in</p>
+          <p className="mt-4 text-xl font-semibold tracking-tight">
+            {isSignUp ? "Create Account" : "Log in"}
+          </p>
 
-          <Button className="mt-8 w-full gap-3">
+          {/* Error Message */}
+          {error && (
+            <div className="mt-4 w-full p-3 bg-destructive/10 text-destructive text-sm rounded-md">
+              {error}
+            </div>
+          )}
+
+          <Button
+            className="mt-8 w-full gap-3"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            variant="outline"
+          >
             <GoogleLogo />
             Continue with Google
           </Button>
@@ -116,6 +191,7 @@ const Login = () => {
                         placeholder="Email"
                         className="w-full"
                         {...field}
+                        disabled={loading}
                       />
                     </FormControl>
                     <FormMessage />
@@ -134,30 +210,46 @@ const Login = () => {
                         placeholder="Password"
                         className="w-full"
                         {...field}
+                        disabled={loading}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Continue with Email
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading
+                  ? "Processing..."
+                  : isSignUp
+                    ? "Create Account"
+                    : "Continue with Email"}
               </Button>
             </form>
           </Form>
 
           <div className="mt-5 space-y-5">
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-sm block underline text-muted-foreground text-center"
             >
               Forgot your password?
             </Link>
+
             <p className="text-sm text-center">
-              Don&apos;t have an account?
-              <Link href="#" className="ml-1 underline text-muted-foreground">
-                Create account
-              </Link>
+              {isSignUp ? "Already have an account?" : "Don't have an account?"}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError("");
+                  form.reset();
+                }}
+                className="ml-1 underline text-muted-foreground hover:text-foreground"
+                disabled={loading}
+              >
+                {isSignUp ? "Sign in" : "Create account"}
+              </button>
             </p>
           </div>
         </div>
