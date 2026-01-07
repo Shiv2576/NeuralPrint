@@ -17,7 +17,6 @@ export interface JobCreateData {
   description: string;
 }
 
-// 1. CREATE: Add a new job
 export async function createJob(jobData: JobCreateData): Promise<Job> {
   const { data, error } = await supabase
     .from("jobs")

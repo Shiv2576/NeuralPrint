@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createJob, deleteJob } from "@/components/adminjobboard";
+import ShowJob from "@/components/showjobs";
 
 export default function AdminDashboard() {
   const [job, setJob] = useState({ title: "", company: "", description: "" });
@@ -95,6 +96,8 @@ export default function AdminDashboard() {
           </Button>
         </form>
       </div>
+
+      <ShowJob />
     </div>
   );
 }

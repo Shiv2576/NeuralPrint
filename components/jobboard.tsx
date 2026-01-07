@@ -3,13 +3,32 @@
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { checkAdmin } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 export default function JobBoardButton() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Optional: You can use this to pre-check auth status on mount,
+    // but we're handling it on click for simplicity and freshness.
+    setLoading(false);
+  }, []);
 
   const handleClick = async () => {
-    const isAdmin = await checkAdmin();
+    // Get current session/user from Supabase
+    const {
+      data: { user },
+    } = await (await import("@/lib/supabase/client")).supabase.auth.getUser();
 
+    if (!user) {
+      // Not signed in → redirect to login
+      router.push("/login");
+      return;
+    }
+
+    // User is signed in — check if admin
+    const isAdmin = await checkAdmin();
     if (isAdmin) {
       router.push("/admin/dashboard");
     } else {
@@ -18,7 +37,11 @@ export default function JobBoardButton() {
   };
 
   return (
-    <Button className="hidden xs:inline-flex" onClick={handleClick}>
+    <Button
+      className="hidden xs:inline-flex"
+      onClick={handleClick}
+      disabled={loading}
+    >
       Job Board
     </Button>
   );
