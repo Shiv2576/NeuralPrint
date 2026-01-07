@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { signUp, signIn } from "../lib/supabase/supabaselogin";
@@ -31,6 +31,22 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { supabase } = await import("../lib/supabase/supabaselogin");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        router.replace("/");
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       email: "",
@@ -44,7 +60,6 @@ const Login = () => {
     setError("");
 
     try {
-      // Remove AuthResult type - TypeScript will infer from function returns
       const result = isSignUp
         ? await signUp(data.email, data.password)
         : await signIn(data.email, data.password);
@@ -54,6 +69,7 @@ const Login = () => {
         return;
       }
 
+      // For email/password login, redirect to dashboard
       router.push("/dashboard");
     } catch (err: unknown) {
       const errorMessage =
@@ -68,24 +84,29 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
-    // Simple Google OAuth - you'll need to add this to supabaselogin.ts
     setLoading(true);
     setError("");
 
-    // Import supabase client directly for now
-    const { supabase } = await import("../lib/supabase/supabaselogin");
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { supabase } = await import("../lib/supabase/supabaselogin");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+      // OAuth will redirect automatically, no router.push needed here
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to initiate Google login";
+      setError(errorMessage);
       setLoading(false);
     }
-    // If no error, OAuth will redirect automatically
   };
 
   return (

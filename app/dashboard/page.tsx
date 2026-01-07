@@ -155,24 +155,6 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-
-        {/* Quick Stats (Optional) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="font-medium text-gray-700">Total Jobs</h3>
-            <p className="text-3xl font-bold mt-2">{jobs.length}</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="font-medium text-gray-700">Recent Activity</h3>
-            <p className="text-3xl font-bold mt-2">
-              {jobs.length > 0 ? "Active" : "None"}
-            </p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="font-medium text-gray-700">Your Access</h3>
-            <p className="text-lg font-medium mt-2 text-green-600">Verified</p>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 "use client";
-
 import { supabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -58,14 +57,13 @@ export default function ShowJob() {
   return (
     <div className="min-h-screen p-4 sm:p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Job Listings</h1>
-
       {jobs.length === 0 ? (
         <p className="text-gray-500">No jobs found</p>
       ) : (
         <div className="space-y-6">
           {jobs.map((job) => (
             <Link
-              href={`/application?id=${job.id}`}
+              href={`/application?id=${job.id}`} // ✅ Fixed: Use curly braces with template literal
               key={job.id}
               className="block bg-white border border-gray-200 rounded-lg p-6
                          shadow-sm transition-shadow duration-200
@@ -87,9 +85,10 @@ export default function ShowJob() {
                   </span>
                 </div>
               </div>
-
               {job.description && (
-                <p className="mt-3 text-gray-700">{job.description}</p>
+                <p className="mt-3 text-gray-700 line-clamp-2">
+                  {job.description}
+                </p>
               )}
             </Link>
           ))}
