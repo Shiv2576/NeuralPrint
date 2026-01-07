@@ -1,4 +1,3 @@
-import CTABanner from "@/components/cta-banner";
 import FAQ from "@/components/faq";
 import Footer from "@/components/footer";
 import Hero from "@/components/hero";
@@ -13,7 +12,6 @@ export default function Home() {
         <Hero />
         <CoreValues />
         <FAQ />
-        <CTABanner />
         <Footer />
       </main>
     </>
