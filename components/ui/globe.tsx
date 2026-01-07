@@ -77,7 +77,7 @@ export default function Globe({
     if (!canvas) return;
 
     const onResize = () => {
-      widthRef.current = canvas.offsetWidth;
+      widthRef.current = canvas.offsetWidth; // ✅ Use ref
     };
 
     window.addEventListener("resize", onResize);
@@ -88,7 +88,7 @@ export default function Globe({
       width: widthRef.current * 2,
       height: widthRef.current * 2,
       onRender: (state) => {
-        if (!pointerInteracting.current) phiRef.current += 0.005;
+        if (!pointerInteracting.current) phiRef.current += 0.005; // ✅ Use ref
         state.phi = phiRef.current + rs.get();
         state.width = widthRef.current * 2;
         state.height = widthRef.current * 2;
@@ -106,7 +106,7 @@ export default function Globe({
       }
       window.removeEventListener("resize", onResize);
     };
-  }, [rs, config]); // phiRef is a ref, so it doesn't need to be in dependencies
+  }, [rs, config]);
 
   return (
     <div className={cn("relative size-full", className)}>
