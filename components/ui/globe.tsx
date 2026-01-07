@@ -43,11 +43,12 @@ export default function Globe({
   className?: string;
   config?: COBEOptions;
 }) {
-  let phi = 0;
-  let width = 0;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<number | null>(null);
   const pointerInteractionMovement = useRef(0);
+  const widthRef = useRef(0);
+  const phiRef = useRef(0);
+  const globeRef = useRef<ReturnType<typeof createGlobe> | null>(null);
 
   const r = useMotionValue(0);
   const rs = useSpring(r, {
@@ -72,33 +73,40 @@ export default function Globe({
   };
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const onResize = () => {
-      if (canvasRef.current) {
-        width = canvasRef.current.offsetWidth;
-      }
+      widthRef.current = canvas.offsetWidth;
     };
 
     window.addEventListener("resize", onResize);
     onResize();
 
-    const globe = createGlobe(canvasRef.current!, {
+    globeRef.current = createGlobe(canvas, {
       ...config,
-      width: width * 2,
-      height: width * 2,
+      width: widthRef.current * 2,
+      height: widthRef.current * 2,
       onRender: (state) => {
-        if (!pointerInteracting.current) phi += 0.005;
-        state.phi = phi + rs.get();
-        state.width = width * 2;
-        state.height = width * 2;
+        if (!pointerInteracting.current) phiRef.current += 0.005;
+        state.phi = phiRef.current + rs.get();
+        state.width = widthRef.current * 2;
+        state.height = widthRef.current * 2;
       },
     });
 
-    setTimeout(() => (canvasRef.current!.style.opacity = "1"), 0);
+    setTimeout(() => {
+      canvas.style.opacity = "1";
+    }, 0);
+
     return () => {
-      globe.destroy();
+      if (globeRef.current) {
+        globeRef.current.destroy();
+        globeRef.current = null;
+      }
       window.removeEventListener("resize", onResize);
     };
-  }, [rs, config]);
+  }, [rs, config]); // phiRef is a ref, so it doesn't need to be in dependencies
 
   return (
     <div className={cn("relative size-full", className)}>
