@@ -51,7 +51,9 @@ const Navbar = () => {
 
     return () => {
       subscription.unsubscribe();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      ScrollTrigger.getAll().forEach((trigger) => {
+        trigger.kill();
+      });
     };
   }, []);
 

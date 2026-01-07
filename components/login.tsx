@@ -44,31 +44,24 @@ const Login = () => {
     setError("");
 
     try {
-      let result: AuthResult;
-
-      if (isSignUp) {
-        result = await signUp(data.email, data.password);
-      } else {
-        result = await signIn(data.email, data.password);
-      }
-
-      console.log("Auth result:", result); // Debug log
+      // Remove AuthResult type - TypeScript will infer from function returns
+      const result = isSignUp
+        ? await signUp(data.email, data.password)
+        : await signIn(data.email, data.password);
 
       if (result.error) {
-        console.error("Auth error:", result.error); // Debug log
         setError(result.error.message);
         return;
       }
 
-      console.log("Redirecting to /dashboard..."); // Debug log
       router.push("/dashboard");
     } catch (err: unknown) {
-      console.error("Catch error:", err); // Debug log
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred. Please try again.";
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
