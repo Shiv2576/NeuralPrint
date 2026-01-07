@@ -1,10 +1,8 @@
 // ./ui/supabaselogin.ts
 import { supabase } from "@/lib/supabase/client";
 
-// Export supabase client for Google OAuth
 export { supabase };
 
-// Simple Sign Up
 export async function signUp(
   email: string,
   password: string,
@@ -19,29 +17,36 @@ export async function signUp(
       },
     },
   });
+
   return { data, error };
 }
 
-// Simple Sign In
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password,
   });
+
   return { data, error };
 }
 
-// Simple Sign Out
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   return { error };
 }
 
+// Google OAuth
+
+const redirectTo =
+  typeof window !== "undefined"
+    ? `${window.location.origin}/auth/callback`
+    : `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`;
+
 export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo, // ✅ FIXED
       queryParams: {
         access_type: "offline",
         prompt: "consent",
