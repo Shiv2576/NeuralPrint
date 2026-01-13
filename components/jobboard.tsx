@@ -2,8 +2,8 @@
 
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
-import { checkAdmin } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import checkAdmin from "@/lib/supabase/checkAdmin";
 
 export default function JobBoardButton() {
   const router = useRouter();
